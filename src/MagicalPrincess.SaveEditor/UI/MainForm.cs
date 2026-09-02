@@ -29,14 +29,16 @@ namespace MagicalPrincess.SaveEditor.UI
         private ListView slotList;
         private Button btnOpenSlot, btnReloadSlots, btnSave, btnApplyQuick, btnApplyEdit;
         private TreeView jsonTree;
-        private Label lblEditPath, lblDirty;
+        private Label lblEditPath, lblDirty, pathLabel;
         private TextBox txtEditValue, qMoney, qStress, qBlackCoin, qActivePower, qSkillPoint, qFatherFav;
-        private ComboBox cmbEditBool;
+        private ComboBox cmbEditBool, cmbSlot;
         private CheckBox chkFullScreen, chkVSync;
         private ComboBox cmbResolution, cmbQuality, cmbLang, cmbMsgSpeed;
         private TextBox txtBGM, txtSE, txtVoice;
         private Button btnSaveSettings, btnReloadSettings;
         private readonly List<BeginnerField> beginnerFields = new List<BeginnerField>();
+        private readonly List<FriendField> friendFields = new List<FriendField>();
+        private FlowLayoutPanel friendFlow;
         private StatusStrip statusStrip;
         private ToolStripStatusLabel statusLabel;
 
@@ -64,7 +66,9 @@ namespace MagicalPrincess.SaveEditor.UI
         {
             var menu = new MenuStrip();
             var file = new ToolStripMenuItem("文件(&F)");
-            file.DropDownItems.Add("选择存档目录…", null, (s, e) => ChooseSaveDir());
+            file.DropDownItems.Add("自动定位存档目录", null, (s, e) => AutoLocateSaveDir());
+            file.DropDownItems.Add("打开存档目录", null, (s, e) => OpenSaveDir());
+            file.DropDownItems.Add("手动指定存档目录…", null, (s, e) => ManualChooseSaveDir());
             file.DropDownItems.Add("打开备份文件夹", null, (s, e) =>
             {
                 if (store != null && System.IO.Directory.Exists(store.BackupDir))
@@ -88,18 +92,115 @@ namespace MagicalPrincess.SaveEditor.UI
             Controls.Add(menu);
         }
 
-        private void ChooseSaveDir()
+        private void ApplyStore(SaveStore s)
         {
-            using var dlg = new FolderBrowserDialog
+            store = s;
+            pathLabel.Text = "存档目录: " + (s?.RootDir ?? "未定位");
+            RefreshSlotList();
+            LoadSettingsTab();
+        }
+
+        private void AutoLocateSaveDir()
+        {
+            var detected = SaveStore.DetectSaveDir();
+            if (detected == null)
             {
-                Description = "选择 Magical Princess 存档目录(包含 v10_*.dat 的文件夹)",
-                SelectedPath = store?.RootDir ?? ""
-            };
+                MessageBox.Show(
+                    "没有自动找到存档目录。\n\n默认位置:\n" +
+                    System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "LocalLow", "Neotro Inc_", "MagicalPrincess") +
+                    "\n\n注意:AppData 是 Windows 隐藏文件夹,资源管理器里要开启「查看 → 隐藏的项目」才看得见。\n也可以点「手动指定存档目录」直接粘贴路径。",
+                    "自动定位失败", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            ApplyStore(new SaveStore(detected));
+            statusLabel.Text = "存档目录: " + detected;
+            MessageBox.Show(
+                "已找到存档目录:\n" + detected + "\n\n槽位列表已刷新,直接到「存档编辑」页选槽位即可。\n想看文件的话,点「文件 → 打开存档目录」(但不用打开任何文件,工具会自动读取)。",
+                "自动定位成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void OpenSaveDir()
+        {
+            if (store == null)
+            {
+                var detected = SaveStore.DetectSaveDir();
+                if (detected == null)
+                {
+                    MessageBox.Show("还没有定位到存档目录,先点「自动定位存档目录」。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                store = new SaveStore(detected);
+            }
+            try { System.Diagnostics.Process.Start("explorer.exe", store.RootDir); }
+            catch { }
+        }
+
+        private void ManualChooseSaveDir()
+        {
+            using var dlg = new SaveDirDialog(store?.RootDir);
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                store = new SaveStore(dlg.SelectedPath);
-                RefreshSlotList();
-                LoadSettingsTab();
+                ApplyStore(new SaveStore(dlg.SelectedPath));
+                statusLabel.Text = "存档目录: " + dlg.SelectedPath;
+            }
+        }
+
+        private class SaveDirDialog : Form
+        {
+            public string SelectedPath => txt.Text.Trim();
+            private readonly TextBox txt;
+
+            public SaveDirDialog(string currentPath)
+            {
+                Text = "手动指定存档目录";
+                FormBorderStyle = FormBorderStyle.FixedDialog;
+                MaximizeBox = false;
+                MinimizeBox = false;
+                StartPosition = FormStartPosition.CenterParent;
+                ClientSize = new Size(640, 250);
+
+                var tip = new Label
+                {
+                    Text = "这里填的是【文件夹】路径,不是文件——文件夹里应能看到 v10_userdata0.dat 等文件。\n默认位置:%USERPROFILE%\\AppData\\LocalLow\\Neotro Inc_\\MagicalPrincess(AppData 是隐藏文件夹,\n资源管理器里需开启「查看 → 隐藏的项目」才能看到)。\n不知道路径的话,直接点「自动检测」即可。",
+                    Left = 12, Top = 10, Width = 616, Height = 92
+                };
+                txt = new TextBox { Left = 12, Top = 110, Width = 616 };
+                txt.Text = currentPath ?? "";
+                var btnDetect = new Button { Text = "自动检测", Left = 12, Top = 142, Width = 90 };
+                btnDetect.Click += (s, e) =>
+                {
+                    var d = SaveStore.DetectSaveDir();
+                    txt.Text = d ?? PathHint();
+                };
+                var btnBrowse = new Button { Text = "浏览…", Left = 110, Top = 142, Width = 90 };
+                btnBrowse.Click += (s, e) =>
+                {
+                    using var fbd = new FolderBrowserDialog
+                    {
+                        Description = "选择包含 v10_*.dat 的文件夹(若看不到 AppData,请直接在输入框粘贴路径)",
+                        SelectedPath = txt.Text
+                    };
+                    if (fbd.ShowDialog(this) == DialogResult.OK) txt.Text = fbd.SelectedPath;
+                };
+                var btnOk = new Button { Text = "确定", Left = 12, Top = 178, Width = 90, DialogResult = DialogResult.OK };
+                var btnCancel = new Button { Text = "取消", Left = 110, Top = 178, Width = 90, DialogResult = DialogResult.Cancel };
+                AcceptButton = btnOk;
+                CancelButton = btnCancel;
+                Controls.AddRange(new Control[] { tip, txt, btnDetect, btnBrowse, btnOk, btnCancel });
+            }
+
+            private static string PathHint() =>
+                System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "AppData", "LocalLow", "Neotro Inc_", "MagicalPrincess");
+
+            protected override void OnFormClosing(FormClosingEventArgs e)
+            {
+                if (DialogResult == DialogResult.OK && !System.IO.Directory.Exists(SelectedPath))
+                {
+                    MessageBox.Show("这个路径不存在,请检查后再试。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    e.Cancel = true;
+                }
+                base.OnFormClosing(e);
             }
         }
 
@@ -133,7 +234,16 @@ namespace MagicalPrincess.SaveEditor.UI
             btnReloadSlots.Click += (s, e) => RefreshSlotList();
             bar.Controls.Add(btnOpenSlot);
             bar.Controls.Add(btnReloadSlots);
+            pathLabel = new Label
+            {
+                Dock = DockStyle.Top,
+                Height = 34,
+                Padding = new Padding(6, 4, 0, 0),
+                AutoEllipsis = true
+            };
+            pathLabel.Text = "存档目录: " + (store?.RootDir ?? "未定位");
             left.Controls.Add(slotList);
+            left.Controls.Add(pathLabel);
             left.Controls.Add(bar);
 
             // right: tree + edit + quick + save
@@ -273,6 +383,10 @@ namespace MagicalPrincess.SaveEditor.UI
 3. 每次保存自动备份原文件到存档目录 backups 下。
 
 【使用步骤】
+0. 如果没找到存档:它默认在 %USERPROFILE%\AppData\LocalLow\Neotro Inc_\MagicalPrincess
+   (AppData 是隐藏文件夹,资源管理器需开启「查看 → 隐藏的项目」)。
+   存档目录里的 .dat 文件是加密数据,双击会弹「打开方式」窗口,属正常现象,
+   不用理会——本工具自动读取整个文件夹,你不需要打开任何文件。
 1. 关闭游戏(重要!游戏退出时会写存档,会覆盖你的修改)。
 2. 打开本工具,选择槽位,修改数值,点「保存到存档」。
 3. 进游戏读档,确认数值生效。
@@ -321,6 +435,7 @@ namespace MagicalPrincess.SaveEditor.UI
             {
                 MessageBox.Show("读取槽位列表失败:\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            RefreshSlotCombo();
         }
 
         private void OpenSelectedSlot()
@@ -331,7 +446,12 @@ namespace MagicalPrincess.SaveEditor.UI
                 MessageBox.Show("请先选择一个槽位。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            var slot = (int)slotList.SelectedItems[0].Tag;
+            LoadSlot((int)slotList.SelectedItems[0].Tag);
+        }
+
+        private void LoadSlot(int slot)
+        {
+            if (store == null) return;
             try
             {
                 currentUser = store.LoadUserData(slot);
@@ -346,6 +466,45 @@ namespace MagicalPrincess.SaveEditor.UI
             {
                 MessageBox.Show("打开槽位失败:\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private class SlotItem
+        {
+            public int Id;
+            public string Text;
+            public override string ToString() => Text;
+        }
+
+        private void RefreshSlotCombo()
+        {
+            if (cmbSlot == null) return;
+            int selected = cmbSlot.SelectedItem is SlotItem s ? s.Id : -1;
+            cmbSlot.BeginUpdate();
+            cmbSlot.Items.Clear();
+            if (store != null)
+            {
+                try
+                {
+                    foreach (var info in store.ReadSlots())
+                    {
+                        var text = info.Exists
+                            ? "#" + info.SlotId + " | " + (string.IsNullOrEmpty(info.PlayerName) ? "(未命名)" : info.PlayerName)
+                              + " | 周目" + info.LoopCount + " | " + info.Date
+                            : "#" + info.SlotId + " | (空)";
+                        cmbSlot.Items.Add(new SlotItem { Id = info.SlotId, Text = text });
+                    }
+                }
+                catch { }
+            }
+            for (int i = 0; i < cmbSlot.Items.Count; i++)
+            {
+                if (((SlotItem)cmbSlot.Items[i]).Id == selected)
+                {
+                    cmbSlot.SelectedIndex = i;
+                    break;
+                }
+            }
+            cmbSlot.EndUpdate();
         }
 
         // ---------------------------------------------------------------- tree
@@ -588,10 +747,37 @@ namespace MagicalPrincess.SaveEditor.UI
             public Label Cur;
         }
 
+        private class FriendField
+        {
+            public int Id;
+            public TextBox Box;
+            public Label Cur;
+        }
+
+        private static readonly Dictionary<int, string> FriendNames = new Dictionary<int, string>
+        {
+            { 0, "库洛瓦" }, { 1, "修可拉" }, { 2, "弗兰" }, { 3, "可罗奈莉亚" },
+            { 4, "夏尔" }, { 5, "哈希斯" }, { 6, "诺亚" },
+        };
+
         private TabPage BuildBeginnerTab()
         {
             var page = new TabPage("常用修改 (新手)");
             var panel = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(12) };
+
+            var slotBar = new FlowLayoutPanel { Left = 12, Top = 4, Width = 920, Height = 44 };
+            var lblSlot = new Label { Text = "选择存档槽位:", AutoSize = true, Padding = new Padding(0, 8, 0, 0) };
+            cmbSlot = new ComboBox { Width = 380, DropDownStyle = ComboBoxStyle.DropDownList };
+            cmbSlot.SelectedIndexChanged += (s, e) =>
+            {
+                if (cmbSlot.SelectedItem is SlotItem item) LoadSlot(item.Id);
+            };
+            var btnRefreshSlots = new Button { Text = "刷新槽位", Width = 90, Height = 28 };
+            btnRefreshSlots.Click += (s, e) => RefreshSlotList();
+            slotBar.Controls.Add(lblSlot);
+            slotBar.Controls.Add(cmbSlot);
+            slotBar.Controls.Add(btnRefreshSlots);
+            panel.Controls.Add(slotBar);
 
             var groups = new (string, (string, string, bool)[])[]
             {
@@ -602,26 +788,28 @@ namespace MagicalPrincess.SaveEditor.UI
                     ("父亲昵称 (文字)", "fg", true),
                     ("周目", "c", true),
                     ("功绩点", "ap", true),
-                    ("柯内特最高好感", "cmf", true),
+                    ("可罗奈莉亚最高好感", "cmf", true),
                 }),
-                ("金钱与资源", new[]
+                ("顶部栏目", new[]
                 {
                     ("金钱", "m", false),
                     ("累计获得金钱", "mgt", false),
-                    ("黑币", "bc", false),
                     ("行动力", "ap", false),
                     ("行动力上限", "am", false),
-                    ("技能点", "skp", false),
-                }),
-                ("心态与关系", new[]
-                {
                     ("压力", "st", false),
-                    ("善良", "ga", false),
+                    ("东亚硬币", "bc", false),
+                    ("善行", "ga", false),
                     ("恶行", "ba", false),
-                    ("善恶平衡", "bl", false),
-                    ("父亲好感", "ff", false),
-                    ("父亲好感等级", "fv", false),
-                    ("名誉", "r", false),
+                }),
+                ("属性 (体力/智力/魅力/感性由下列细项自动算出,改细项即可)", new[]
+                {
+                    ("力量", "p1", false), ("生命", "p2", false), ("意志", "p3", false), ("敏捷", "p4", false),
+                    ("文学", "i1", false), ("算术", "i2", false), ("魔术", "i3", false), ("信仰", "i4", false),
+                    ("美貌", "c1", false), ("社交", "c2", false), ("礼仪", "c3", false), ("道德", "c4", false),
+                    ("想象", "s1", false), ("创意", "s2", false), ("音乐", "s3", false), ("美术", "s4", false),
+                    ("父女感情", "ff", false),
+                    ("名声", "r", false),
+                    ("技能点数", "skp", false),
                 }),
                 ("七项等级", new[]
                 {
@@ -632,17 +820,6 @@ namespace MagicalPrincess.SaveEditor.UI
                     ("战斗等级", "lb", false),
                     ("艺术等级", "la", false),
                     ("魔法等级", "lm", false),
-                    ("体力经验", "vp", false),
-                    ("智力经验", "vi", false),
-                    ("魅力经验", "vc", false),
-                    ("感性经验", "vs", false),
-                }),
-                ("细项属性", new[]
-                {
-                    ("筋力", "p1", false), ("生命", "p2", false), ("根性", "p3", false), ("敏捷", "p4", false),
-                    ("文学", "i1", false), ("算数", "i2", false), ("魔术", "i3", false), ("信仰", "i4", false),
-                    ("美貌", "c1", false), ("社交", "c2", false), ("礼仪", "c3", false), ("道德", "c4", false),
-                    ("创造", "s1", false), ("创作", "s2", false), ("音感", "s3", false), ("美感", "s4", false),
                 }),
                 ("战斗与装备", new[]
                 {
@@ -660,7 +837,7 @@ namespace MagicalPrincess.SaveEditor.UI
                 }),
             };
 
-            int y = 4;
+            int y = 52;
             foreach (var (title, fields) in groups)
             {
                 var grp = new GroupBox { Text = title, Left = 12, Top = y, Width = 900 };
@@ -683,6 +860,16 @@ namespace MagicalPrincess.SaveEditor.UI
                 y += grp.Height + 8;
                 panel.Controls.Add(grp);
             }
+
+            var friendGrp = new GroupBox
+            {
+                Text = "伙伴好感 (friendDataParamList)",
+                Left = 12, Top = y, Width = 900, Height = 430
+            };
+            friendFlow = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(6) };
+            friendGrp.Controls.Add(friendFlow);
+            panel.Controls.Add(friendGrp);
+            y += 438;
 
             var saveRow = new FlowLayoutPanel { Left = 12, Top = y, Width = 900, Height = 56 };
             var btnSaveAll = new Button { Text = "保存全部修改 (留空 = 不改)", Width = 240, Height = 32 };
@@ -719,6 +906,35 @@ namespace MagicalPrincess.SaveEditor.UI
                     f.Cur.Text = "当前: (无)";
                 }
             }
+
+            friendFlow.Controls.Clear();
+            friendFields.Clear();
+            var friends = currentUser["friendDataParamList"] as JArray;
+            if (friends != null)
+            {
+                foreach (var t in friends)
+                {
+                    if (t is not JObject fo) continue;
+                    int id = fo.Value<int?>("id") ?? -1;
+                    if (id < 0 || !FriendNames.ContainsKey(id)) continue;
+                    string name = FriendNames[id];
+                    var row = new Panel { Width = 284, Height = 30 };
+                    var lbl = new Label { Text = name + " (#" + id + ")", Left = 2, Top = 5, Width = 150, AutoEllipsis = true };
+                    var box = new TextBox { Left = 156, Top = 2, Width = 64 };
+                    var cur = new Label { Left = 226, Top = 5, Width = 58, ForeColor = Color.Gray, AutoSize = true };
+                    var fav = fo["f"];
+                    if (fav is JValue fv && fv.Type != JTokenType.Null)
+                    {
+                        box.Text = Convert.ToString(fv.Value, CultureInfo.InvariantCulture);
+                        cur.Text = fv.ToString();
+                    }
+                    row.Controls.Add(lbl);
+                    row.Controls.Add(box);
+                    row.Controls.Add(cur);
+                    friendFlow.Controls.Add(row);
+                    friendFields.Add(new FriendField { Id = id, Box = box, Cur = cur });
+                }
+            }
         }
 
         private void SaveBeginner()
@@ -753,6 +969,29 @@ namespace MagicalPrincess.SaveEditor.UI
                     changed = true;
                 }
                 catch { }
+            }
+            var friendArr = currentUser["friendDataParamList"] as JArray;
+            foreach (var f in friendFields)
+            {
+                var text = f.Box.Text.Trim();
+                if (text.Length == 0) continue;
+                if (!int.TryParse(text, out var fv))
+                {
+                    MessageBox.Show("伙伴 #" + f.Id + " 的好感请输入整数。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (friendArr != null)
+                {
+                    foreach (var t in friendArr)
+                    {
+                        if (t is JObject fo && fo.Value<int?>("id") == f.Id)
+                        {
+                            fo["f"] = new JValue(fv);
+                            changed = true;
+                            break;
+                        }
+                    }
+                }
             }
             if (!changed)
             {

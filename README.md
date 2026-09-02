@@ -34,6 +34,11 @@ Steam: <https://store.steampowered.com/app/3562120/>
 
 Steam Cloud syncs the edited files normally, nothing extra to set up.
 
+The release build is self-contained: double-click and run, no .NET install
+needed. If you run a source/dev build and see a "You must install or update
+.NET to run this application." dialog, click Download it now to install the
+.NET 8 Desktop Runtime.
+
 ### Download
 
 - GitHub Releases: <https://github.com/PensiveFei/MagicalPrincess-SaveEditor/releases>
@@ -79,6 +84,10 @@ Steam 商店: <https://store.steampowered.com/app/3562120/>
 4. 进游戏读档
 
 Steam 云存档会正常同步改过的文件,不用额外设置。
+
+发布版自带运行环境,双击就能跑,不用装 .NET。若你运行的是源码开发版并弹出
+"You must install or update .NET to run this application." 提示,点 Download it
+now 安装 .NET 8 Desktop Runtime 即可。
 
 ### 下载
 

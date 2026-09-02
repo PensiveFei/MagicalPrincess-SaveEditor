@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.3 (2026-09-02)
+
+- Slot picker now sits directly on the beginner tab - no more tab hopping.
+- Companion favor (伙伴好感) section for the 7 named characters.
+- All field labels aligned with the game's official Chinese terms (thanks to
+  the community CT table).
+- Removed derived values that cannot be edited meaningfully (the four computed
+  main attributes, good/evil balance).
+- Save-directory UX: loud auto-locate feedback, persistent path label, manual
+  dialog accepts pasted paths (AppData is a hidden folder).
+- README: note that the release build is self-contained and needs no .NET.
+
 ## v0.1.2 (2026-09-02)
 
 - Rewrote the README in a friendlier, less corporate tone; bilingual layout
