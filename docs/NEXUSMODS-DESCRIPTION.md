@@ -7,7 +7,7 @@ Magical Princess Save Editor (Open Source)
 ## 短描述 (short description)
 
 Unofficial open-source save editor: edit money, stats, items and game settings
-for Magical Princess (Steam). Automatic backups. 非官方开源存档编辑器。
+for Magical Princess (Steam). Automatic backups. 非官方开源存档修改器。
 
 ## 长描述 (long description)
 
@@ -47,7 +47,7 @@ Neotro Inc. / MAGI Inc.
 
 # 中文说明
 
-《Magical Princess》非官方开源存档编辑器:
+《Magical Princess》非官方开源存档修改器:
 
 - 列出全部 31 个存档槽位(名字/周目/日期/等级);
 - 以 JSON 树编辑任意数值:金钱、压力、黑币、行动力、技能点、

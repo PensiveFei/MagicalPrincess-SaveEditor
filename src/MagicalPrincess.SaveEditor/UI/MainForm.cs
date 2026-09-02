@@ -80,7 +80,7 @@ namespace MagicalPrincess.SaveEditor.UI
                 catch { }
             });
             help.DropDownItems.Add("关于", null, (s, e) => MessageBox.Show(
-                "Magical Princess Save Editor v0.1\n\n非官方存档编辑器。\n- 修改前请先关闭游戏。\n- 每次保存会自动备份原文件到存档目录 backups\\ 下。\n- 本项目不含任何游戏素材,与开发商/发行商无关。\n\n风险自负,开心游戏!",
+                "Magical Princess Save Editor v0.1\n\n非官方存档修改器(只改存档文件,不碰游戏程序)。\n- 修改前请先关闭游戏。\n- 每次保存会自动备份原文件到存档目录 backups\\ 下。\n- 本项目不含任何游戏素材,与开发商/发行商无关。\n\n风险自负,开心游戏!",
                 "关于", MessageBoxButtons.OK, MessageBoxIcon.Information));
             menu.Items.Add(file);
             menu.Items.Add(help);
@@ -264,7 +264,7 @@ namespace MagicalPrincess.SaveEditor.UI
                 ScrollBars = ScrollBars.Vertical,
                 Font = new Font("Microsoft YaHei UI", 10f)
             };
-            box.Text = @"Magical Princess Save Editor — 非官方存档编辑器
+            box.Text = @"Magical Princess Save Editor — 非官方存档修改器(只改存档文件,不碰游戏程序)
 
 【功能】
 1. 存档编辑:列出 31 个槽位,以树状结构编辑任意 JSON 字段(金钱、压力、

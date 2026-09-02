@@ -1,12 +1,10 @@
-# Magical Princess Save Editor / 《Magical Princess》存档编辑器(非官方)
+# Magical Princess Save Editor(存档修改器 · 非官方)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**EN** — Unofficial **open-source save editor** for *Magical Princess* (Steam),
-the daughter-raising simulation game by Neotro Inc. / MAGI Inc.
+**EN** — A small open-source save editor for *Magical Princess* (Steam), the daughter-raising sim by Neotro Inc. / MAGI Inc.
 
-**中文** —— Neotro Inc. / MAGI Inc. 出品的养女儿模拟游戏
-*Magical Princess*(Steam 版)的开源**第三方存档编辑器**。
+**中文** —— 给《Magical Princess》(Steam 版,Neotro Inc. / MAGI Inc. 的养女儿模拟游戏)写的一个小存档修改器(只改存档文件,不碰游戏程序)。开源、MIT、非官方。
 
 ---
 
@@ -14,63 +12,45 @@ the daughter-raising simulation game by Neotro Inc. / MAGI Inc.
 
 ### About the game
 
-It has its rough edges, but overall *Magical Princess* is a lovely game:
-beautiful UI, full voice acting and a huge amount of CG art — and the
-daughter is really kawaii. If that sounds good to you, grab the original on
-Steam and experience it yourself:
-<https://store.steampowered.com/app/3562120/>
+The game has its flaws, but all in all it's pretty good: polished UI, full voice acting, and a ton of CG art — and the daughter is just so kawaii! I recommend grabbing *Magical Princess* on Steam and playing the original first.
 
-Once the late-game stat-grinding starts to feel repetitive, that is where
-this editor comes in: tweak values, unlock routes, and focus on enjoying
-the many story endings.
+Once the late-game stat grinding starts to feel repetitive, that's when this editor comes in: tweak the numbers, unlock branches, and just enjoy all the different story endings.
+
+Steam: <https://store.steampowered.com/app/3562120/>
 
 ### What it does
 
-- **Edit saves**: lists all 31 slots and lets you edit any value in the save
-  as a JSON tree — money, stress, black coins, action points, skill points,
-  the 7 stat levels, father favor, items, flags, and more. A beginner tab
-  with labeled quick-edit fields for the most common values is one click away.
-- **Edit game settings**: resolution tier (up to 3840x2160), fullscreen,
-  quality, vsync, language, volumes and text speed.
-- **Safe by design**: every write creates a timestamped backup under
-  <code>backups\</code> in the save folder, and the original files are never
-  modified in any other way.
+- "Quick edit" tab: money, stress, black coins, action points, skill points, the 7 stat levels, father favor... labeled fields with current values pre-filled, blank = unchanged, one-click save;
+- "Advanced edit" tab lays the whole save out as a tree — item counts, friendship, skill unlocks, event flags, all the niche stuff too;
+- "Game settings": resolution (up to 3840x2160), fullscreen/windowed, quality, vsync, language, volumes, text speed;
+- Every save first makes a timestamped backup of the original file in the backups folder, so you can always undo.
 
-### How it works (technical)
+### How to use
 
-The game stores saves as JSON encrypted with AES-128-CBC (hardcoded key),
-then Base64, in
-<code>%USERPROFILE%\AppData\LocalLow\Neotro Inc_\MagicalPrincess\</code>.
-This editor decrypts them, lets you edit the JSON, and re-encrypts with the
-exact same scheme. No game code is modified and no game assets are included.
+1. Close the game first (it writes saves on exit and would overwrite your edits);
+2. Run MagicalPrincess.SaveEditor.exe, no install needed;
+3. Pick a slot → change values → save;
+4. Load the slot in game.
 
-### Usage
-
-1. **Close the game** (it writes saves on exit and would overwrite your edits).
-2. Run <code>MagicalPrincess.SaveEditor.exe</code>.
-3. Pick a slot, edit values, press **Save** (a backup is made automatically).
-4. Launch the game and load the slot.
-
-> Steam Cloud: the edited files are synced normally — no special steps needed.
+Steam Cloud syncs the edited files normally, nothing extra to set up.
 
 ### Download
 
 - GitHub Releases: <https://github.com/PensiveFei/MagicalPrincess-SaveEditor/releases>
-- Nexus Mods: <https://www.nexusmods.com/magicalprincess> (Save Games category)
+- Nexus Mods: <https://www.nexusmods.com/magicalprincess> (Save Games)
 
-### Build from source
+### Build it yourself
 
 ~~~
 powershell
 dotnet publish src/MagicalPrincess.SaveEditor -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o dist
 ~~~
 
-### Disclaimer
+### Important note
 
-This is a fan-made, unofficial tool. It is not affiliated with, endorsed by,
-or connected to Neotro Inc. or MAGI Inc. It contains no game assets and does
-not modify the game program. Use at your own risk; extreme values may break
-the intended game balance or achievements.
+This is an unofficial save editor.
+The prebuilt binary is provided for convenience; if you have any concerns, build it from source yourself.
+All consequences of use are borne by the user.
 
 ---
 
@@ -78,58 +58,45 @@ the intended game balance or achievements.
 
 ### 关于《Magical Princess》
 
-游戏虽然有槽点,但总的来说还是不错的:精美的 UI + 全配音 + 海量插画 CG,
-关键女儿真的很卡哇伊。感兴趣的推荐大家前往 Steam 购买《Magical Princess》
-体验原作:<https://store.steampowered.com/app/3562120/>
+游戏虽然有槽点,但总得来说还是不错的,精美的UI+全配音+海量插画cg,关键女儿真的很卡哇伊!推荐大家前往Steam购买《Magical Princess》体验原作
 
-当你已经感受到后期刷属性的重复枯燥之后,再使用本存档编辑器——用来调整
-数值、解锁分支,专心体验各式各样的故事结局。
+当你已经感受到后期刷属性的重复枯燥之后,再使用本存档编辑器,用来调整数值、解锁分支,专心体验各式各样的故事结局。
 
-### 功能
+Steam 商店: <https://store.steampowered.com/app/3562120/>
 
-- **存档编辑**:列出全部 31 个槽位,提供「常用修改(新手)」页——中文标签、
-  自动带出当前值,金钱、压力、黑币、行动力、技能点、七项等级、父亲好感
-  等一键修改;「高级编辑」页还能以 JSON 树的形式编辑任意字段(物品数量、
-  好友好感、技能解锁、事件标记等)。
-- **游戏设置**:分辨率档位(最高 3840x2160)、全屏/窗口、画质、垂直同步、
-  语言、音量、文本速度。
-- **安全设计**:每次写入前都会把原文件备份为时间戳副本,存放在存档目录的
-  <code>backups\</code> 下,可随时找回。
+### 能改什么
 
-### 原理(技术)
+- 「常用修改」:金钱、压力、黑币、行动力、技能点、七项等级、父亲好感……中文标签,当前值自动带出,留空就不动,一键保存;
+- 「高级编辑」页把存档整个摊开成树,物品数量、好友好感、技能解锁、事件标记这些冷门东西也能直接改
+- 「游戏设置」分辨率(最高 3840x2160)、全屏/窗口、画质、垂直同步、语言、音量、文本速度;
+- 每次保存前都把原文件按时间戳备份到 backups 文件夹,改坏了能还原。
 
-游戏把存档序列化为 JSON,用 AES-128-CBC(密钥硬编码)加密后 Base64 存盘,
-位于 <code>%USERPROFILE%\AppData\LocalLow\Neotro Inc_\MagicalPrincess\</code>。
-本工具用完全相同的算法解密 → 编辑 → 重新加密写回。
-**不修改游戏程序本体,也不包含任何游戏素材。**
+### 怎么用
 
-### 使用方法
+1. 先关游戏(它退出时会写存档,不然会盖掉你的修改);
+2. 运行 MagicalPrincess.SaveEditor.exe,免安装
+3. 选槽位 → 改数值 → 保存;
+4. 进游戏读档
 
-1. **先关闭游戏**(游戏退出时会写存档,可能覆盖你的修改);
-2. 运行 <code>MagicalPrincess.SaveEditor.exe</code>;
-3. 打开「存档编辑」页选择槽位 → 回「常用修改(新手)」页修改数值 →
-   点「保存全部修改」(自动备份);
-4. 进游戏读档,确认生效。
-
-> Steam 云存档:修改后的文件会正常同步,无需额外操作。
+Steam 云存档会正常同步改过的文件,不用额外设置。
 
 ### 下载
 
 - GitHub Releases: <https://github.com/PensiveFei/MagicalPrincess-SaveEditor/releases>
 - Nexus Mods: <https://www.nexusmods.com/magicalprincess>(Save Games 分类)
 
-### 从源码构建
+### 自己编译
 
 ~~~
 powershell
 dotnet publish src/MagicalPrincess.SaveEditor -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o dist
 ~~~
 
-### 免责声明
+### 重要提示
 
-本工具为爱好者制作的非官方工具,与 Neotro Inc.、MAGI Inc. 无任何关联。
-不含游戏素材,不修改游戏程序。请适度修改,极端数值可能破坏游戏体验或成就。
-风险自负。
+本工具为非官方存档编辑工具。
+预编译程序仅供方便使用,心存顾虑可以自行从源码编译。
+一切使用后果由使用者自行承担。
 
 ---
 

@@ -2,11 +2,11 @@
 
 ## 标题
 
-《Magical Princess》存档编辑器使用指南(非官方开源工具)
+《Magical Princess》存档修改器使用指南(非官方开源工具)
 
 ## 正文
 
-这是一款为《Magical Princess》(Steam 版)制作的非官方**开源存档编辑器**。
+这是一款为《Magical Princess》(Steam 版)制作的非官方**开源存档修改器**。
 
 【功能】
 - 列出全部 31 个存档槽位,显示名字、周目、日期、七项等级;

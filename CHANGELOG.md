@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.1.2 (2026-09-02)
+
+- Rewrote the README in a friendlier, less corporate tone; bilingual layout
+  with a game recommendation section written by the project owner.
+- Chinese name changed to 「存档修改器」(repo and English name unchanged).
+- Removed all inline HTML tags from the README — they broke GitHub rendering
+  in v0.1.1 (from "How it works (technical)" on, the rest of the page
+  rendered in code style). All clear now.
+- Updated publishing drafts (NexusMods / Steam guide) and in-app About text.
+
 ## v0.1.1 (2026-09-02)
 
 - New beginner tab ("常用修改"): labeled quick-edit fields in Chinese with
