@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
@@ -35,6 +36,7 @@ namespace MagicalPrincess.SaveEditor.UI
         private ComboBox cmbResolution, cmbQuality, cmbLang, cmbMsgSpeed;
         private TextBox txtBGM, txtSE, txtVoice;
         private Button btnSaveSettings, btnReloadSettings;
+        private readonly List<BeginnerField> beginnerFields = new List<BeginnerField>();
         private StatusStrip statusStrip;
         private ToolStripStatusLabel statusLabel;
 
@@ -106,6 +108,7 @@ namespace MagicalPrincess.SaveEditor.UI
         private void BuildTabs()
         {
             tabs = new TabControl { Dock = DockStyle.Fill };
+            tabs.TabPages.Add(BuildBeginnerTab());
             tabs.TabPages.Add(BuildSaveTab());
             tabs.TabPages.Add(BuildSettingsTab());
             tabs.TabPages.Add(BuildAboutTab());
@@ -336,6 +339,7 @@ namespace MagicalPrincess.SaveEditor.UI
                 userDirty = false;
                 UpdateDirtyLabel();
                 BuildTreeRoot();
+                PopulateBeginnerTab();
                 statusLabel.Text = "已打开槽位 " + slot + " | 存档目录: " + store.RootDir;
             }
             catch (Exception ex)
@@ -571,6 +575,205 @@ namespace MagicalPrincess.SaveEditor.UI
         {
             lblDirty.Text = userDirty ? "有未保存的修改!" : "未修改";
             lblDirty.ForeColor = userDirty ? Color.Red : Color.Gray;
+        }
+
+        // ---------------------------------------------------------------- beginner tab
+
+        private class BeginnerField
+        {
+            public string Label;
+            public string Key;
+            public bool IsGStatus;
+            public TextBox Box;
+            public Label Cur;
+        }
+
+        private TabPage BuildBeginnerTab()
+        {
+            var page = new TabPage("常用修改 (新手)");
+            var panel = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(12) };
+
+            var groups = new (string, (string, string, bool)[])[]
+            {
+                ("基本资料", new[]
+                {
+                    ("玩家名 (文字)", "pn", true),
+                    ("父亲名 (文字)", "fn", true),
+                    ("父亲昵称 (文字)", "fg", true),
+                    ("周目", "c", true),
+                    ("功绩点", "ap", true),
+                    ("柯内特最高好感", "cmf", true),
+                }),
+                ("金钱与资源", new[]
+                {
+                    ("金钱", "m", false),
+                    ("累计获得金钱", "mgt", false),
+                    ("黑币", "bc", false),
+                    ("行动力", "ap", false),
+                    ("行动力上限", "am", false),
+                    ("技能点", "skp", false),
+                }),
+                ("心态与关系", new[]
+                {
+                    ("压力", "st", false),
+                    ("善良", "ga", false),
+                    ("恶行", "ba", false),
+                    ("善恶平衡", "bl", false),
+                    ("父亲好感", "ff", false),
+                    ("父亲好感等级", "fv", false),
+                    ("名誉", "r", false),
+                }),
+                ("七项等级", new[]
+                {
+                    ("体力等级", "lp", false),
+                    ("智力等级", "li", false),
+                    ("魅力等级", "lc", false),
+                    ("感性等级", "ls", false),
+                    ("战斗等级", "lb", false),
+                    ("艺术等级", "la", false),
+                    ("魔法等级", "lm", false),
+                    ("体力经验", "vp", false),
+                    ("智力经验", "vi", false),
+                    ("魅力经验", "vc", false),
+                    ("感性经验", "vs", false),
+                }),
+                ("细项属性", new[]
+                {
+                    ("筋力", "p1", false), ("生命", "p2", false), ("根性", "p3", false), ("敏捷", "p4", false),
+                    ("文学", "i1", false), ("算数", "i2", false), ("魔术", "i3", false), ("信仰", "i4", false),
+                    ("美貌", "c1", false), ("社交", "c2", false), ("礼仪", "c3", false), ("道德", "c4", false),
+                    ("创造", "s1", false), ("创作", "s2", false), ("音感", "s3", false), ("美感", "s4", false),
+                }),
+                ("战斗与装备", new[]
+                {
+                    ("战斗经验", "b0", false),
+                    ("衣服 (-1=未装备)", "ec", false),
+                    ("衣服外观", "ecl", false),
+                    ("武器 (-1=未装备)", "ew", false),
+                    ("护甲 (-1=未装备)", "ea", false),
+                }),
+                ("价格/工资倍率 (%)", new[]
+                {
+                    ("工资倍率", "ksl", false),
+                    ("购买价格倍率", "bpr", false),
+                    ("出售价格倍率", "spr", false),
+                }),
+            };
+
+            int y = 4;
+            foreach (var (title, fields) in groups)
+            {
+                var grp = new GroupBox { Text = title, Left = 12, Top = y, Width = 900 };
+                int rowY = 24;
+                int col = 0;
+                foreach (var (label, key, isG) in fields)
+                {
+                    var rowX = 12 + (col % 3) * 290;
+                    var lbl = new Label { Text = label, Left = rowX, Top = rowY, Width = 128 };
+                    var box = new TextBox { Left = rowX + 132, Top = rowY - 2, Width = 70 };
+                    var cur = new Label { Left = rowX + 206, Top = rowY, Width = 82, ForeColor = Color.Gray, AutoSize = true };
+                    grp.Controls.Add(lbl);
+                    grp.Controls.Add(box);
+                    grp.Controls.Add(cur);
+                    beginnerFields.Add(new BeginnerField { Label = label, Key = key, IsGStatus = isG, Box = box, Cur = cur });
+                    col++;
+                    if (col % 3 == 0) rowY += 30;
+                }
+                grp.Height = rowY + 46;
+                y += grp.Height + 8;
+                panel.Controls.Add(grp);
+            }
+
+            var saveRow = new FlowLayoutPanel { Left = 12, Top = y, Width = 900, Height = 56 };
+            var btnSaveAll = new Button { Text = "保存全部修改 (留空 = 不改)", Width = 240, Height = 32 };
+            btnSaveAll.Click += (s, e) => SaveBeginner();
+            var tip = new Label
+            {
+                Text = "用法:先到「存档编辑」页选择槽位,再回到本页修改 → 保存。输入框留空表示保持原值。",
+                AutoSize = true, Padding = new Padding(10, 8, 0, 0)
+            };
+            saveRow.Controls.Add(btnSaveAll);
+            saveRow.Controls.Add(tip);
+            panel.Controls.Add(saveRow);
+
+            page.Controls.Add(panel);
+            return page;
+        }
+
+        private void PopulateBeginnerTab()
+        {
+            foreach (var f in beginnerFields)
+            {
+                var obj = f.IsGStatus ? currentUser["gstatus"] as JObject : currentUser["status"] as JObject;
+                var tok = obj?[f.Key];
+                if (tok is JValue v && v.Type != JTokenType.Null)
+                {
+                    f.Box.Text = v.Type == JTokenType.String
+                        ? (string)v.Value
+                        : Convert.ToString(v.Value, CultureInfo.InvariantCulture);
+                    f.Cur.Text = "当前: " + f.Box.Text;
+                }
+                else
+                {
+                    f.Box.Text = "";
+                    f.Cur.Text = "当前: (无)";
+                }
+            }
+        }
+
+        private void SaveBeginner()
+        {
+            if (store == null || currentUser == null || currentSlot < 0)
+            {
+                MessageBox.Show("请先打开一个槽位。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            var changed = false;
+            foreach (var f in beginnerFields)
+            {
+                var text = f.Box.Text.Trim();
+                if (text.Length == 0) continue;
+                var obj = f.IsGStatus ? currentUser["gstatus"] as JObject : currentUser["status"] as JObject;
+                if (obj == null || obj[f.Key] == null) continue;
+                try
+                {
+                    if (f.Key == "pn" || f.Key == "fn" || f.Key == "fg")
+                    {
+                        obj[f.Key] = new JValue(text);
+                    }
+                    else if (!int.TryParse(text, out var iv))
+                    {
+                        MessageBox.Show("字段「" + f.Label + "」请输入整数。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    else
+                    {
+                        obj[f.Key] = new JValue(iv);
+                    }
+                    changed = true;
+                }
+                catch { }
+            }
+            if (!changed)
+            {
+                MessageBox.Show("没有需要修改的内容(输入框都为空)。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            try
+            {
+                store.SaveUserData(currentSlot, currentUser);
+                store.SyncIndexFromUserData(currentSlot, currentUser);
+                userDirty = false;
+                UpdateDirtyLabel();
+                RefreshSlotList();
+                BuildTreeRoot();
+                PopulateBeginnerTab();
+                statusLabel.Text = "已保存槽位 " + currentSlot + ",原文件已备份到 backups 文件夹。";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("保存失败:\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // ---------------------------------------------------------------- settings tab

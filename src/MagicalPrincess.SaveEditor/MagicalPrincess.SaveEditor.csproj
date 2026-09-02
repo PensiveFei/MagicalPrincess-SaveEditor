@@ -7,7 +7,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <AssemblyName>MagicalPrincess.SaveEditor</AssemblyName>
     <RootNamespace>MagicalPrincess.SaveEditor</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
     <AssemblyTitle>Magical Princess Save Editor</AssemblyTitle>
     <Description>Unofficial open-source save editor for Magical Princess (Steam).</Description>

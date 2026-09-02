@@ -18,7 +18,7 @@ Actions 会自动:构建 → 打包 zip → 上传 artifact → 创建 Release �
 1. 打开 <https://www.nexusmods.com/magicalprincess>(Games > Magical Princess);
 2. Add a mod → 分类选 **Save Games / 存档**;
 3. 上传 zip,名称建议:Magical Princess Save Editor (Open Source);
-4. 简介要点:开源、GitHub 链接、功能列表(见 README.zh-Hans.md 功能一节)、
+4. 简介要点:开源、GitHub 链接、功能列表(见 README.md 中文部分「功能」一节)、
    使用三步(关游戏 → 改 → 保存),附 GitHub Releases 链接互相引流;
 5. 遵守 NexusMods 规则:确认不含游戏素材(本项目只含自研代码)。
 
