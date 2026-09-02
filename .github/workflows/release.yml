@@ -1,0 +1,39 @@
+name: Build Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Publish (self-contained single file)
+        run: >
+          dotnet publish src/MagicalPrincess.SaveEditor/MagicalPrincess.SaveEditor.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true -o dist
+
+      - name: Package zip
+        shell: pwsh
+        run: Compress-Archive -Path dist\MagicalPrincess.SaveEditor.exe -DestinationPath MagicalPrincess-SaveEditor-win-x64.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MagicalPrincess-SaveEditor-win-x64
+          path: MagicalPrincess-SaveEditor-win-x64.zip
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: MagicalPrincess-SaveEditor-win-x64.zip
+          generate_release_notes: true

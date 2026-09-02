@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>MagicalPrincess.SaveEditor</AssemblyName>
+    <RootNamespace>MagicalPrincess.SaveEditor</RootNamespace>
+    <Version>0.1.0</Version>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+    <AssemblyTitle>Magical Princess Save Editor</AssemblyTitle>
+    <Description>Unofficial open-source save editor for Magical Princess (Steam).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+</Project>

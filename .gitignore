@@ -1,0 +1,9 @@
+bin/
+obj/
+*.user
+.vs/
+*.tmp
+*.bak-*
+backups/
+publish/
+dist/
