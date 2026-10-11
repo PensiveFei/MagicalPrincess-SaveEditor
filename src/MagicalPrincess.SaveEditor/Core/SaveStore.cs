@@ -17,6 +17,12 @@ namespace MagicalPrincess.SaveEditor.Core
         public const string DeviceFile = "v10_devicedata.cfg";
         public const int SlotTotal = 31;
 
+        /// <summary>
+        /// Save files are named "v10_*" by the game. If the game ever bumps that
+        /// prefix (v10_ -> v11_ ...) none of the names above will be found.
+        /// </summary>
+        public const string FilePrefix = "v10_";
+
         public string RootDir { get; }
         public string BackupDir => Path.Combine(RootDir, "backups");
 
@@ -41,6 +47,31 @@ namespace MagicalPrincess.SaveEditor.Core
         }
 
         public string UserDataFile(int slot) => "v10_userdata" + slot + ".dat";
+
+        /// <summary>
+        /// Guard against a game update that renames the save files. Returns true
+        /// when the folder holds save-like files but none of them carries the
+        /// prefix this build knows about - the most likely cause being that the
+        /// game bumped its save format version.
+        /// </summary>
+        public bool DetectFormatMismatch(out string[] foundFiles)
+        {
+            foundFiles = new string[0];
+            if (!Directory.Exists(RootDir)) return false;
+
+            var unknown = new List<string>();
+            foreach (var path in Directory.GetFiles(RootDir, "v*_*"))
+            {
+                var name = Path.GetFileName(path);
+                if (!name.StartsWith(FilePrefix, StringComparison.OrdinalIgnoreCase))
+                    unknown.Add(name);
+            }
+            if (unknown.Count == 0) return false;
+
+            unknown.Sort(StringComparer.OrdinalIgnoreCase);
+            foundFiles = unknown.ToArray();
+            return true;
+        }
 
         public string FullPath(string fileName) => Path.Combine(RootDir, fileName);
 

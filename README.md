@@ -20,7 +20,7 @@ Steam: <https://store.steampowered.com/app/3562120/>
 
 ### What it does
 
-- "Quick edit" tab: money, stress, black coins, action points, skill points, the 7 stat levels, father favor... labeled fields with current values pre-filled, blank = unchanged, one-click save;
+- "Quick edit" tab: money, stress, East Asian coins, action points, skill points, the 7 stat levels, father-daughter bond... labeled fields with current values pre-filled, blank = unchanged, one-click save;
 - "Advanced edit" tab lays the whole save out as a tree — item counts, friendship, skill unlocks, event flags, all the niche stuff too;
 - "Game settings": resolution (up to 3840x2160), fullscreen/windowed, quality, vsync, language, volumes, text speed;
 - Every save first makes a timestamped backup of the original file in the backups folder, so you can always undo.
@@ -46,10 +46,9 @@ needed. If you run a source/dev build and see a "You must install or update
 
 ### Build it yourself
 
-~~~
-powershell
+```powershell
 dotnet publish src/MagicalPrincess.SaveEditor -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o dist
-~~~
+```
 
 ### Important note
 
@@ -71,7 +70,7 @@ Steam 商店: <https://store.steampowered.com/app/3562120/>
 
 ### 能改什么
 
-- 「常用修改」:金钱、压力、黑币、行动力、技能点、七项等级、父亲好感……中文标签,当前值自动带出,留空就不动,一键保存;
+- 「常用修改」:金钱、压力、东亚硬币、行动力、技能点、七项等级、父女感情……中文标签,当前值自动带出,留空就不动,一键保存;
 - 「高级编辑」页把存档整个摊开成树,物品数量、好友好感、技能解锁、事件标记这些冷门东西也能直接改
 - 「游戏设置」分辨率(最高 3840x2160)、全屏/窗口、画质、垂直同步、语言、音量、文本速度;
 - 每次保存前都把原文件按时间戳备份到 backups 文件夹,改坏了能还原。
@@ -96,10 +95,9 @@ now 安装 .NET 8 Desktop Runtime 即可。
 
 ### 自己编译
 
-~~~
-powershell
+```powershell
 dotnet publish src/MagicalPrincess.SaveEditor -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o dist
-~~~
+```
 
 ### 重要提示
 
