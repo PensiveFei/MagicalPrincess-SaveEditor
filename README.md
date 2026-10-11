@@ -37,12 +37,19 @@ Steam Cloud syncs the edited files normally, nothing extra to set up.
 The release build is self-contained: double-click and run, no .NET install
 needed. If you run a source/dev build and see a "You must install or update
 .NET to run this application." dialog, click Download it now to install the
-.NET 8 Desktop Runtime.
+.NET 10 Desktop Runtime.
+
+### Platform
+
+**Windows only.** The game itself also runs on Macs with Apple Silicon (M1 or
+later), but this editor does not: its interface is built on WinForms, which is
+Windows-only. The save files use the same format on both systems, so a Mac
+version is possible — it just needs someone with a Mac to build and test it.
+If you would like to help, open an issue.
 
 ### Download
 
 - GitHub Releases: <https://github.com/PensiveFei/MagicalPrincess-SaveEditor/releases>
-- Nexus Mods: <https://www.nexusmods.com/magicalprincess> (Save Games)
 
 ### Build it yourself
 
@@ -86,12 +93,18 @@ Steam 云存档会正常同步改过的文件,不用额外设置。
 
 发布版自带运行环境,双击就能跑,不用装 .NET。若你运行的是源码开发版并弹出
 "You must install or update .NET to run this application." 提示,点 Download it
-now 安装 .NET 8 Desktop Runtime 即可。
+now 安装 .NET 10 Desktop Runtime 即可。
+
+### 支持平台
+
+**仅限 Windows。** 游戏本体已经支持 Apple Silicon(M1 及以上)的 Mac,但本工具
+跑不了 Mac:界面用的是 WinForms,只有 Windows 才有。两个平台的存档格式是一样
+的,所以做 Mac 版是可行的,只是需要有人在 Mac 上编译和测试。愿意帮忙的话欢迎
+开 issue。
 
 ### 下载
 
 - GitHub Releases: <https://github.com/PensiveFei/MagicalPrincess-SaveEditor/releases>
-- Nexus Mods: <https://www.nexusmods.com/magicalprincess>(Save Games 分类)
 
 ### 自己编译
 

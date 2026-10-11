@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.1.5 (2026-10-11)
+
+- Moved to .NET 10 (`net8.0-windows` -> `net10.0-windows`, CI to the 10.0.x SDK).
+  .NET 8 leaves support on 2026-11-10, and the release binary bundles its own
+  runtime, so staying on 8 would have meant shipping a runtime that no longer gets
+  security fixes.
+- README: new platform section. The game now ships a Mac build (Apple Silicon,
+  M1 or later), while this editor is Windows-only because its UI is WinForms. The
+  save format is identical on both systems, so a Mac port is feasible - it just
+  needs someone with a Mac to build and test it.
+- README: dropped the Nexus Mods download line. The upload is still an open
+  to-do in PUBLISHING.md and no mod page could be confirmed, so that link only
+  led to the game's Nexus section. See PUBLISHING.md for where to put it back.
+- Docs: the runtime quoted for source builds is now the .NET 10 Desktop Runtime.
+
 ## v0.1.4 (2026-10-11)
 
 - Compatibility guard: if the game ever renames its save files (a new version
