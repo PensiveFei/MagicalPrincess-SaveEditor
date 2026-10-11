@@ -403,6 +403,29 @@ namespace MagicalPrincess.SaveEditor.UI
 
         // ---------------------------------------------------------------- slots
 
+        /// <summary>
+        /// Report a read failure. When the save folder is there but the file names
+        /// are not the ones this build knows, say that explicitly instead of only
+        /// echoing a raw FileNotFoundException in English.
+        /// </summary>
+        private void ReportReadFailure(string action, Exception ex)
+        {
+            if (store != null && store.DetectFormatMismatch(out var found))
+            {
+                MessageBox.Show(
+                    action + "失败:存档目录里的文件名和本工具预期的对不上。\n\n" +
+                    "本工具当前只认 " + SaveStore.FilePrefix + "* 开头的存档文件,但目录里找到的是:\n  " +
+                    string.Join("\n  ", found) + "\n\n" +
+                    "这通常意味着游戏更新后改了存档格式,或者手动指定错了文件夹。\n" +
+                    "请到 GitHub 提 issue 并附上这份文件名列表,作者会跟进适配:\n" +
+                    "https://github.com/PensiveFei/MagicalPrincess-SaveEditor/issues\n\n" +
+                    "原始错误:" + ex.Message,
+                    "存档格式可能已变化", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            MessageBox.Show(action + "失败:\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
         private void RefreshSlotList()
         {
             slotList.Items.Clear();
@@ -433,7 +456,7 @@ namespace MagicalPrincess.SaveEditor.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("读取槽位列表失败:\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ReportReadFailure("读取槽位列表", ex);
             }
             RefreshSlotCombo();
         }
@@ -464,7 +487,7 @@ namespace MagicalPrincess.SaveEditor.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("打开槽位失败:\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ReportReadFailure("打开槽位", ex);
             }
         }
 
@@ -494,7 +517,10 @@ namespace MagicalPrincess.SaveEditor.UI
                         cmbSlot.Items.Add(new SlotItem { Id = info.SlotId, Text = text });
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    if (statusLabel != null) statusLabel.Text = "槽位下拉列表读取失败:" + ex.Message;
+                }
             }
             for (int i = 0; i < cmbSlot.Items.Count; i++)
             {
@@ -945,12 +971,18 @@ namespace MagicalPrincess.SaveEditor.UI
                 return;
             }
             var changed = false;
+            var missing = new List<string>();
+            var failed = new List<string>();
             foreach (var f in beginnerFields)
             {
                 var text = f.Box.Text.Trim();
                 if (text.Length == 0) continue;
                 var obj = f.IsGStatus ? currentUser["gstatus"] as JObject : currentUser["status"] as JObject;
-                if (obj == null || obj[f.Key] == null) continue;
+                if (obj == null || obj[f.Key] == null)
+                {
+                    missing.Add(f.Label + " (" + f.Key + ")");
+                    continue;
+                }
                 try
                 {
                     if (f.Key == "pn" || f.Key == "fn" || f.Key == "fg")
@@ -968,7 +1000,10 @@ namespace MagicalPrincess.SaveEditor.UI
                     }
                     changed = true;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    failed.Add(f.Label + ": " + ex.Message);
+                }
             }
             var friendArr = currentUser["friendDataParamList"] as JArray;
             foreach (var f in friendFields)
@@ -980,6 +1015,7 @@ namespace MagicalPrincess.SaveEditor.UI
                     MessageBox.Show("伙伴 #" + f.Id + " 的好感请输入整数。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
+                var matched = false;
                 if (friendArr != null)
                 {
                     foreach (var t in friendArr)
@@ -988,14 +1024,33 @@ namespace MagicalPrincess.SaveEditor.UI
                         {
                             fo["f"] = new JValue(fv);
                             changed = true;
+                            matched = true;
                             break;
                         }
                     }
                 }
+                if (!matched) missing.Add("伙伴 #" + f.Id + " (friendDataParamList)");
+            }
+            if (missing.Count > 0)
+            {
+                MessageBox.Show(
+                    "以下字段在当前存档里找不到,已跳过:\n  " + string.Join("\n  ", missing) +
+                    "\n\n通常这说明游戏更新后改了存档字段名,请到 GitHub 提 issue 告知:\n" +
+                    "https://github.com/PensiveFei/MagicalPrincess-SaveEditor/issues",
+                    "字段缺失", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            if (failed.Count > 0)
+            {
+                MessageBox.Show(
+                    "以下字段写入失败,已跳过:\n  " + string.Join("\n  ", failed),
+                    "部分修改失败", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             if (!changed)
             {
-                MessageBox.Show("没有需要修改的内容(输入框都为空)。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (missing.Count == 0 && failed.Count == 0)
+                {
+                    MessageBox.Show("没有需要修改的内容(输入框都为空)。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
                 return;
             }
             try
